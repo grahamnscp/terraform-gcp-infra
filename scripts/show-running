@@ -1,0 +1,37 @@
+#!/bin/bash
+
+source params.sh
+source load-tf-output.sh
+
+for ((NODE=1; NODE<=$NUM_NODES; NODE++))
+do
+  NODENAME=${NODE_NAME[$NODE]}
+  NODEIP=${NODE_PUBLIC_IP[$NODE]}
+
+  #DOWN=`ping -c 1 $NODEIP | grep "100.0% packet loss" | wc -l | sed -e 's/^[ \t]*//'`
+
+  # using curl faster when down
+  #curl --max-time 1 ${NODEIP}:22
+  # down:
+  #curl: (28) Connection timed out after 1002 milliseconds
+  # up:
+  #curl: (1) Received HTTP/0.9 when not allowed
+  DOWN=`curl --max-time 1 ${NODEIP}:22 2>&1| grep "Connection timed out" | wc -l | sed -e 's/^[ \t]*//'`
+
+  if [ "$DOWN" == 1 ]
+  then
+     echo "$NODENAME: $NODEIP - DOWN"
+  else
+    SVC=0
+    KUBE=0
+    KUBE=`ssh $SSH_OPTS $SSH_USERNAME@$NODEIP which kubectl 2>&1 | grep -v " no" | wc -l | sed -e 's/^[ \t]*//'`
+    case "$KUBE" in
+    "1")
+      SVC=`ssh $SSH_OPTS $SSH_USERNAME@${NODEIP} kubectl --kubeconfig /etc/kubernetes/admin.conf get svc --all-namespaces | egrep -v 'monitoring|system|prometheus|longhorn|registry|minio|postgresql|rqlite|kubernetes|contour|NAMESPACE' | awk '{printf "%s:%s\n",$1,$2}'`
+      ;;
+    esac
+
+    echo $NODENAME: $NODEIP - KUBE: $KUBE SVC: $SVC
+  fi
+
+done

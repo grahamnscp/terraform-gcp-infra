@@ -1,0 +1,32 @@
+# tfvars
+#
+
+# Unique prefix for resources
+prefix= "my"
+
+# Resource tag labels
+purpose="demos"
+owner="me"
+slack_owner="myslack"
+expires_on="2023-02-11"
+
+# Number of instances to provision
+instance_count=2
+instance_type="e2-standard-8"
+#os_image="centos-cloud/centos-7"
+#os_image="rocky-linux-cloud/rocky-linux-8"
+os_image="ubuntu-os-cloud/ubuntu-2204-lts"
+
+# Allow fw access from
+myCIDR="xxx.xxx.xxx.xxx/32"
+myTravelCIDR="xxx.xxx.xxx.xxx/32"
+
+# SSH user
+my_ssh_user="myusername"
+my_ssh_pub_key_file="~/.ssh/myusername.pub"
+
+# GCP provider
+region="us-east1"
+zone="us-east1-b"
+project="my-gcp-project-here"
+
